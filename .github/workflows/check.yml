@@ -28,3 +28,27 @@ jobs:
         distribution: "temurin"
     - name: Check
       run: ./gradlew ${{ matrix.gradle_task }}
+  check-modern-java:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    strategy:
+      fail-fast: false
+      matrix:
+        java:
+        - 11
+        - 17
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up OpenJDK ${{ matrix.java }}
+      uses: actions/setup-java@v5
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: "temurin"
+    - name: Check
+      run: >
+        ./gradlew
+        :embulk-core:check
+        :embulk-ruby:check
+        :embulk-junit4:check
+        :embulk-deps:check
+        :executable
