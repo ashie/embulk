@@ -38,6 +38,7 @@ jobs:
         java:
         - 11
         - 17
+        - 21
     steps:
     - uses: actions/checkout@v6
     - name: Set up OpenJDK 8 toolchain
