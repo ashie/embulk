@@ -71,6 +71,10 @@ task gemContents(type: Copy) {
 
 // TODO: Install dependencies from Gemfile or embulk.gemspec.
 task installDependencyGems(type: JavaExec, dependsOn: "gemContents") {
+    // The bundled JRuby OpenSSL accesses CertificateFactory reflectively when loading certificates.
+    if (JavaVersion.current().isJava9Compatible()) {
+        jvmArgs "--add-opens=java.base/java.security.cert=ALL-UNNAMED"
+    }
     doFirst {
         delete("${buildDir}/dependencyGems")
         mkdir("${buildDir}/dependencyGems")
