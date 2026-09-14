@@ -264,14 +264,30 @@ public class SelfrunTest {
             }
         }
 
-        Process process = Runtime.getRuntime().exec(temp.getAbsolutePath());
+        // Selfrun supports Java 8 only. Use the test JVM, not the Java running Gradle.
+        ProcessBuilder processBuilder = new ProcessBuilder(temp.getAbsolutePath());
+        String pathKey = "PATH";
+        for (String key : processBuilder.environment().keySet()) {
+            if (key.equalsIgnoreCase("PATH")) {
+                pathKey = key;
+                break;
+            }
+        }
+        final String path = processBuilder.environment().get(pathKey);
+        processBuilder.environment().put(pathKey,
+                new File(System.getProperty("java.home"), "bin").getAbsolutePath()
+                        + File.pathSeparator + (path == null ? "" : path));
+        Process process = processBuilder.start();
         int exitCode = process.waitFor();
         if (exitCode != 0 || !argsFile.exists()) {
             StringBuilder builder = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream(),
                                                                                   Charset.defaultCharset()))) {
-                builder.append(reader.readLine());
-                builder.append(System.getProperty("line.separator"));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                    builder.append(System.lineSeparator());
+                }
             }
             throw new Exception(builder.toString());
         }

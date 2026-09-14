@@ -4,6 +4,13 @@ plugins {
 
 group = rootProject.group
 
+// These fixtures are loaded by embulk-core tests running on the Java 8 toolchain.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 task deploy(dependsOn: ["deployJarsForEmbulkTestMavenPlugin"])
 
 /*
